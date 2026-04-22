@@ -1,0 +1,54 @@
+{% extends 'base.html' %}
+{% load exam_filters %}
+{% block title %}Result — {{ exam.title }}{% endblock %}
+
+{% block content %}
+<h2>{{ exam.title }} — Result</h2>
+
+<div class="row mt-4 mb-4">
+  <div class="col-md-4">
+    <div class="card text-center {% if passed %}border-success{% else %}border-danger{% endif %}">
+      <div class="card-body">
+        <h1 class="display-3 {% if passed %}text-success{% else %}text-danger{% endif %}">
+          {{ attempt.score }}%
+        </h1>
+        <p class="fs-4">
+          {% if passed %}
+            <span class="badge bg-success">PASSED</span>
+          {% else %}
+            <span class="badge bg-danger">FAILED</span>
+          {% endif %}
+        </p>
+        <p class="text-muted">Passing score: {{ exam.passing_score }}%</p>
+        {% if attempt.time_exceeded %}
+          <div class="alert alert-warning mt-2 mb-0">Time limit was exceeded</div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+  <div class="col-md-8">
+    <h4>Answer Review</h4>
+    {% for q in questions %}
+    <div class="card mb-2">
+      <div class="card-body py-2">
+        <strong>Q{{ forloop.counter }}.</strong> {{ q.text }}
+        <span class="badge bg-secondary float-end">{{ q.points }} pts</span>
+        <div class="mt-2">
+          {% with selected=answer_map|get_item:q|mongo_id %}
+          {% for opt in q.options %}
+            <div class="{% if forloop.counter0 == q.correct_option %}text-success fw-bold{% endif %}{% if forloop.counter0 == selected and selected != q.correct_option %} text-danger text-decoration-line-through{% endif %}">
+              {% if forloop.counter0 == selected %}&#10148;{% endif %}
+              {% if forloop.counter0 == q.correct_option %}&#10003;{% endif %}
+              {{ opt }}
+            </div>
+          {% endfor %}
+          {% endwith %}
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+
+<a href="{% url 'dashboard' %}" class="btn btn-outline-primary">Back to Dashboard</a>
+{% endblock %}

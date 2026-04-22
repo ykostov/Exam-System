@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+{% block title %}Welcome — ExamSystem{% endblock %}
+
+{% block content %}
+<div class="text-center py-5">
+  <h1 class="display-4">Online Examination System</h1>
+  <p class="lead text-muted">Timed tests, score recording, and integrity enforcement</p>
+  <hr class="my-4">
+  <div class="d-flex justify-content-center gap-3">
+    <a href="{% url 'login' %}" class="btn btn-primary btn-lg">Login</a>
+    <a href="{% url 'register' %}" class="btn btn-outline-primary btn-lg">Register</a>
+  </div>
+</div>
+{% endblock %}

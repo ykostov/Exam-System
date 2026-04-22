@@ -1,0 +1,128 @@
+{% extends 'base.html' %}
+{% block title %}Create Exam — ExamSystem{% endblock %}
+
+{% block content %}
+<h2>Create Exam</h2>
+
+<form method="post" id="exam-form">
+  {% csrf_token %}
+
+  <div class="card mb-4">
+    <div class="card-header"><h5 class="mb-0">Exam Details</h5></div>
+    <div class="card-body">
+      <div class="mb-3">
+        <label class="form-label">Title</label>
+        <input type="text" name="title" class="form-control" required maxlength="200">
+      </div>
+      <div class="mb-3">
+        <label class="form-label">Description</label>
+        <textarea name="description" class="form-control" rows="2"></textarea>
+      </div>
+      <div class="row">
+        <div class="col-md-6 mb-3">
+          <label class="form-label">Duration (minutes)</label>
+          <input type="number" name="duration_minutes" class="form-control" value="30" min="1" max="480" required>
+        </div>
+        <div class="col-md-6 mb-3">
+          <label class="form-label">Passing Score (%)</label>
+          <input type="number" name="passing_score" class="form-control" value="60" min="0" max="100" required>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="questions-container">
+    <div class="card mb-3 question-card" data-index="0">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <h5 class="mb-0">Question 1</h5>
+        <button type="button" class="btn btn-sm btn-outline-danger remove-question" style="display:none;">Remove</button>
+      </div>
+      <div class="card-body">
+        <div class="mb-2">
+          <input type="text" name="q_0_text" class="form-control" placeholder="Question text" required>
+        </div>
+        <div class="options-container">
+          <div class="input-group mb-1">
+            <div class="input-group-text"><input type="radio" name="q_0_correct" value="0" checked></div>
+            <input type="text" name="q_0_opt_0" class="form-control" placeholder="Option A" required>
+          </div>
+          <div class="input-group mb-1">
+            <div class="input-group-text"><input type="radio" name="q_0_correct" value="1"></div>
+            <input type="text" name="q_0_opt_1" class="form-control" placeholder="Option B" required>
+          </div>
+          <div class="input-group mb-1">
+            <div class="input-group-text"><input type="radio" name="q_0_correct" value="2"></div>
+            <input type="text" name="q_0_opt_2" class="form-control" placeholder="Option C">
+          </div>
+          <div class="input-group mb-1">
+            <div class="input-group-text"><input type="radio" name="q_0_correct" value="3"></div>
+            <input type="text" name="q_0_opt_3" class="form-control" placeholder="Option D">
+          </div>
+        </div>
+        <div class="mt-2">
+          <label class="form-label">Points</label>
+          <input type="number" name="q_0_points" class="form-control" value="10" min="1" max="100" style="width:100px">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="mb-4">
+    <button type="button" class="btn btn-outline-secondary" id="add-question">+ Add Question</button>
+  </div>
+
+  <button type="submit" class="btn btn-primary btn-lg">Create Exam</button>
+</form>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+let qIndex = 1;
+document.getElementById('add-question').addEventListener('click', function() {
+  const container = document.getElementById('questions-container');
+  const card = document.createElement('div');
+  card.className = 'card mb-3 question-card';
+  card.dataset.index = qIndex;
+  card.innerHTML = `
+    <div class="card-header d-flex justify-content-between align-items-center">
+      <h5 class="mb-0">Question ${qIndex + 1}</h5>
+      <button type="button" class="btn btn-sm btn-outline-danger remove-question">Remove</button>
+    </div>
+    <div class="card-body">
+      <div class="mb-2">
+        <input type="text" name="q_${qIndex}_text" class="form-control" placeholder="Question text" required>
+      </div>
+      <div class="options-container">
+        <div class="input-group mb-1">
+          <div class="input-group-text"><input type="radio" name="q_${qIndex}_correct" value="0" checked></div>
+          <input type="text" name="q_${qIndex}_opt_0" class="form-control" placeholder="Option A" required>
+        </div>
+        <div class="input-group mb-1">
+          <div class="input-group-text"><input type="radio" name="q_${qIndex}_correct" value="1"></div>
+          <input type="text" name="q_${qIndex}_opt_1" class="form-control" placeholder="Option B" required>
+        </div>
+        <div class="input-group mb-1">
+          <div class="input-group-text"><input type="radio" name="q_${qIndex}_correct" value="2"></div>
+          <input type="text" name="q_${qIndex}_opt_2" class="form-control" placeholder="Option C">
+        </div>
+        <div class="input-group mb-1">
+          <div class="input-group-text"><input type="radio" name="q_${qIndex}_correct" value="3"></div>
+          <input type="text" name="q_${qIndex}_opt_3" class="form-control" placeholder="Option D">
+        </div>
+      </div>
+      <div class="mt-2">
+        <label class="form-label">Points</label>
+        <input type="number" name="q_${qIndex}_points" class="form-control" value="10" min="1" max="100" style="width:100px">
+      </div>
+    </div>`;
+  container.appendChild(card);
+  qIndex++;
+});
+
+document.addEventListener('click', function(e) {
+  if (e.target.classList.contains('remove-question')) {
+    e.target.closest('.question-card').remove();
+  }
+});
+</script>
+{% endblock %}

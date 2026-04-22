@@ -1,0 +1,65 @@
+{% extends 'base.html' %}
+{% load exam_filters %}
+{% block title %}Admin Dashboard — ExamSystem{% endblock %}
+
+{% block content %}
+<h2>Admin Dashboard</h2>
+
+<div class="row mt-4">
+  <div class="col-md-4">
+    <div class="card text-center bg-primary text-white">
+      <div class="card-body">
+        <h3>{{ exams|length }}</h3>
+        <p>Total Exams</p>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="card text-center bg-success text-white">
+      <div class="card-body">
+        <h3>{{ total_students }}</h3>
+        <p>Students</p>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="card text-center bg-info text-white">
+      <div class="card-body">
+        <h3>{{ total_attempts }}</h3>
+        <p>Submitted Attempts</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="d-flex justify-content-between align-items-center mt-4">
+  <h4>Exams</h4>
+  <a href="{% url 'create_exam' %}" class="btn btn-primary">+ Create Exam</a>
+</div>
+
+<table class="table mt-2">
+  <thead>
+    <tr><th>Title</th><th>Duration</th><th>Pass %</th><th>Status</th><th>Avg Score</th><th></th></tr>
+  </thead>
+  <tbody>
+    {% for exam in exams %}
+    <tr>
+      <td><a href="{% url 'exam_detail' exam|mongo_id %}">{{ exam.title }}</a></td>
+      <td>{{ exam.duration_minutes }} min</td>
+      <td>{{ exam.passing_score }}%</td>
+      <td>
+        {% if exam.is_active %}
+          <span class="badge bg-success">Active</span>
+        {% else %}
+          <span class="badge bg-secondary">Inactive</span>
+        {% endif %}
+      </td>
+      <td>
+        {% if exam.avg_score != None %}{{ exam.avg_score }}%{% else %}—{% endif %}
+      </td>
+      <td><a href="{% url 'exam_detail' exam|mongo_id %}" class="btn btn-sm btn-outline-primary">Details</a></td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

@@ -1,0 +1,83 @@
+{% extends 'base.html' %}
+{% load exam_filters %}
+{% block title %}{{ exam.title }} — ExamSystem{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center">
+  <h2>{{ exam.title }}</h2>
+  <form method="post" action="{% url 'toggle_exam' exam|mongo_id %}">
+    {% csrf_token %}
+    {% if exam.is_active %}
+      <button class="btn btn-warning">Deactivate</button>
+    {% else %}
+      <button class="btn btn-success">Activate</button>
+    {% endif %}
+  </form>
+</div>
+
+{% if exam.description %}
+<p class="text-muted">{{ exam.description }}</p>
+{% endif %}
+
+<div class="row mb-4">
+  <div class="col-md-3"><strong>Duration:</strong> {{ exam.duration_minutes }} min</div>
+  <div class="col-md-3"><strong>Passing:</strong> {{ exam.passing_score }}%</div>
+  <div class="col-md-3"><strong>Questions:</strong> {{ questions|length }}</div>
+  <div class="col-md-3">
+    <strong>Status:</strong>
+    {% if exam.is_active %}
+      <span class="badge bg-success">Active</span>
+    {% else %}
+      <span class="badge bg-secondary">Inactive</span>
+    {% endif %}
+  </div>
+</div>
+
+<h4>Questions</h4>
+{% for q in questions %}
+<div class="card mb-2">
+  <div class="card-body py-2">
+    <strong>{{ forloop.counter }}.</strong> {{ q.text }}
+    <span class="badge bg-secondary float-end">{{ q.points }} pts</span>
+    <div class="mt-1 ms-3">
+      {% for opt in q.options %}
+        <div class="{% if forloop.counter0 == q.correct_option %}text-success fw-bold{% endif %}">
+          {% if forloop.counter0 == q.correct_option %}&#10003;{% endif %}
+          {{ opt }}
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+{% endfor %}
+
+{% if difficulty %}
+<h4 class="mt-4">Question Difficulty Analysis</h4>
+<p class="text-muted">Based on student answer data (aggregation pipeline)</p>
+<table class="table">
+  <thead>
+    <tr><th>Question</th><th>Correct Rate</th><th>Difficulty</th><th>Answers</th></tr>
+  </thead>
+  <tbody>
+    {% for d in difficulty %}
+    <tr>
+      <td>{{ d.question_text|truncatechars:60 }}</td>
+      <td>{{ d.correct_rate }}%</td>
+      <td>
+        {% if d.difficulty == 'Easy' %}
+          <span class="badge bg-success">Easy</span>
+        {% elif d.difficulty == 'Medium' %}
+          <span class="badge bg-warning">Medium</span>
+        {% else %}
+          <span class="badge bg-danger">Hard</span>
+        {% endif %}
+      </td>
+      <td>{{ d.total_answers }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endif %}
+
+<a href="{% url 'admin_dashboard' %}" class="btn btn-outline-primary mt-3">Back</a>
+{% endblock %}

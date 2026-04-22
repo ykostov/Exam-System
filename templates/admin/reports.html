@@ -1,0 +1,132 @@
+{% extends 'base.html' %}
+{% block title %}Reports — ExamSystem{% endblock %}
+
+{% block content %}
+<h2>Reports</h2>
+<p class="text-muted">All data generated via MongoDB aggregation pipelines with conditional queries</p>
+
+<!-- Exam Statistics -->
+<div class="card mb-4">
+  <div class="card-header"><h5 class="mb-0">Exam Statistics (Aggregation: $group, $lookup, $project)</h5></div>
+  <div class="card-body">
+    {% if exam_stats %}
+    <table class="table">
+      <thead>
+        <tr><th>Exam</th><th>Attempts</th><th>Avg Score</th><th>Min</th><th>Max</th></tr>
+      </thead>
+      <tbody>
+        {% for s in exam_stats %}
+        <tr>
+          <td>{{ s.exam_title }}</td>
+          <td>{{ s.total_attempts }}</td>
+          <td>{{ s.avg_score }}%</td>
+          <td>{{ s.min_score }}%</td>
+          <td>{{ s.max_score }}%</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% else %}
+    <p class="text-muted">No data yet.</p>
+    {% endif %}
+  </div>
+</div>
+
+<!-- Pass / Fail Rates -->
+<div class="card mb-4">
+  <div class="card-header"><h5 class="mb-0">Pass / Fail Rates (Conditional: $cond)</h5></div>
+  <div class="card-body">
+    {% if pass_fail %}
+    <table class="table">
+      <thead>
+        <tr><th>Exam</th><th>Total</th><th>Passed</th><th>Failed</th><th>Pass Rate</th></tr>
+      </thead>
+      <tbody>
+        {% for pf in pass_fail %}
+        <tr>
+          <td>{{ pf.exam_title }}</td>
+          <td>{{ pf.total }}</td>
+          {% with passed=0 failed=0 %}
+          {% for r in pf.results %}
+            {% if r.status == 'passed' %}
+              <td class="text-success">{{ r.count }}</td>
+            {% else %}
+              <td class="text-danger">{{ r.count }}</td>
+            {% endif %}
+          {% endfor %}
+          {% if pf.results|length == 1 %}
+            <td>0</td>
+          {% endif %}
+          {% endwith %}
+          <td>
+            {% for r in pf.results %}{% if r.status == 'passed' %}{{ r.count }}{% endif %}{% endfor %} / {{ pf.total }}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% else %}
+    <p class="text-muted">No data yet.</p>
+    {% endif %}
+  </div>
+</div>
+
+<!-- Integrity Report -->
+<div class="card mb-4">
+  <div class="card-header"><h5 class="mb-0">Integrity Report (Conditional: $switch, $ifNull)</h5></div>
+  <div class="card-body">
+    {% if integrity %}
+    <table class="table">
+      <thead>
+        <tr><th>Status</th><th>Count</th><th>Avg Score</th></tr>
+      </thead>
+      <tbody>
+        {% for i in integrity %}
+        <tr>
+          <td>
+            {% if i.status == 'Normal' %}
+              <span class="badge bg-success">{{ i.status }}</span>
+            {% elif i.status == 'Time Exceeded' %}
+              <span class="badge bg-warning">{{ i.status }}</span>
+            {% else %}
+              <span class="badge bg-danger">{{ i.status }}</span>
+            {% endif %}
+          </td>
+          <td>{{ i.count }}</td>
+          <td>{{ i.avg_score }}%</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% else %}
+    <p class="text-muted">No data yet.</p>
+    {% endif %}
+  </div>
+</div>
+
+<!-- Top Students -->
+<div class="card mb-4">
+  <div class="card-header"><h5 class="mb-0">Top Students (Aggregation: $group, $lookup, $sort, $limit)</h5></div>
+  <div class="card-body">
+    {% if top_students %}
+    <table class="table">
+      <thead>
+        <tr><th>#</th><th>Student</th><th>Avg Score</th><th>Exams Taken</th></tr>
+      </thead>
+      <tbody>
+        {% for s in top_students %}
+        <tr>
+          <td>{{ forloop.counter }}</td>
+          <td>{{ s.username }}</td>
+          <td>{{ s.avg_score }}%</td>
+          <td>{{ s.exams_taken }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% else %}
+    <p class="text-muted">No data yet.</p>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

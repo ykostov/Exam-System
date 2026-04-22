@@ -1,0 +1,80 @@
+{% extends 'base.html' %}
+{% load exam_filters %}
+{% block title %}Dashboard — ExamSystem{% endblock %}
+
+{% block content %}
+<h2>Student Dashboard</h2>
+
+{% if in_progress %}
+<div class="alert alert-warning">
+  You have an exam in progress.
+  <a href="{% url 'take_exam' in_progress|mongo_id %}" class="btn btn-sm btn-warning ms-2">Continue</a>
+</div>
+{% endif %}
+
+<div class="row mt-4">
+  <!-- Available Exams -->
+  <div class="col-md-6">
+    <div class="card">
+      <div class="card-header bg-primary text-white">
+        <h5 class="mb-0">Available Exams</h5>
+      </div>
+      <div class="card-body">
+        {% if available_exams %}
+          {% for exam in available_exams %}
+          <div class="d-flex justify-content-between align-items-center border-bottom py-2">
+            <div>
+              <strong>{{ exam.title }}</strong>
+              <br><small class="text-muted">{{ exam.duration_minutes }} min | Pass: {{ exam.passing_score }}%</small>
+            </div>
+            <form method="post" action="{% url 'start_exam' exam|mongo_id %}">
+              {% csrf_token %}
+              <button class="btn btn-sm btn-success">Start</button>
+            </form>
+          </div>
+          {% endfor %}
+        {% else %}
+          <p class="text-muted">No exams available right now.</p>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <!-- Performance History -->
+  <div class="col-md-6">
+    <div class="card">
+      <div class="card-header bg-info text-white">
+        <h5 class="mb-0">Your Results</h5>
+      </div>
+      <div class="card-body">
+        {% if performance %}
+          <table class="table table-sm">
+            <thead>
+              <tr><th>Exam</th><th>Score</th><th>Grade</th><th>Status</th><th></th></tr>
+            </thead>
+            <tbody>
+              {% for p in performance %}
+              <tr>
+                <td>{{ p.exam_title }}</td>
+                <td>{{ p.score }}%</td>
+                <td><span class="badge bg-secondary">{{ p.grade }}</span></td>
+                <td>
+                  {% if p.passed %}
+                    <span class="badge bg-success">Passed</span>
+                  {% else %}
+                    <span class="badge bg-danger">Failed</span>
+                  {% endif %}
+                </td>
+                <td><a href="{% url 'exam_result' p|mongo_id %}" class="btn btn-sm btn-outline-primary">View</a></td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        {% else %}
+          <p class="text-muted">No completed exams yet.</p>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
